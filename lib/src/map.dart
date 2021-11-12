@@ -1,8 +1,12 @@
+import 'dart:async';
+
+import 'package:geolocator/geolocator.dart';
 import 'package:map/map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:latlng/latlng.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CustomMap extends StatefulWidget {
   const CustomMap({Key? key}) : super(key: key);
@@ -19,6 +23,44 @@ class _CustomMapState extends State<CustomMap> {
   void _onDoubleTap() {
     controller.zoom += 0.5;
     setState(() {});
+  }
+
+  void _onButton() async {
+    /*final LocationPermission checkedPermission = await GeolocatorPlatform.instance.checkPermission();
+
+    final bool hasAuthorization = checkedPermission == LocationPermission.always
+                               || checkedPermission == LocationPermission.whileInUse;
+
+    if (!hasAuthorization) {
+      await GeolocatorPlatform.instance.requestPermission();
+      return ;
+    }*/
+    try {
+      Position currentPos = await Geolocator.getCurrentPosition();
+      controller.center=(
+        LatLng(
+          currentPos.latitude,
+          currentPos.longitude
+        )
+      );
+    } on TimeoutException {
+      // nothing
+    } on PermissionDeniedException {
+      await GeolocatorPlatform.instance.requestPermission();
+    } on LocationServiceDisabledException {
+      SnackBar(
+        action: SnackBarAction(
+          label: "Settings",
+          onPressed: _openLocSettings,
+        ),
+        content: Text("Location disabled"),
+      );
+    }
+  }
+
+  void _openLocSettings() async {
+    print("Open settings");
+    await GeolocatorPlatform.instance.openLocationSettings();
   }
 
   Offset? _dragStart;
@@ -104,11 +146,10 @@ class _CustomMapState extends State<CustomMap> {
           );
         },
       ),
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: {},
-        tooltip: 'My Location',
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onButton,
         child: Icon(Icons.my_location),
-      ),*/
+      ),
     );
   }
 }
