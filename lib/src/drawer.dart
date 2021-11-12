@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -9,7 +8,7 @@ class CustomDrawer extends StatefulWidget {
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
-  var logo = "images/car.svg";
+  var logo = "images/car.png";
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +20,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
               color: Colors.green,
             ),
             child: Column(
-              children: [
-                const Text(
+              children: const [
+                Text(
                   "ParkedMap",
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
@@ -33,13 +32,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 Expanded(
                   child: FittedBox(
                     fit: BoxFit.contain, // otherwise the logo will be tiny
-                    child: SvgPicture.asset(logo),
+                    child: Image(image: AssetImage("lib/images/car.png")),
                   ),
                 ),
               ]
             ),
           ),
-          const ListTile(leading: Icon(Icons.add_location_alt_rounded), title: const Text("Follow someone")),
+          const ListTile(leading: Icon(Icons.add_location_alt_rounded), title: Text("")),
         ]
       )
     );
