@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'src/home.dart';
 
-void main() => runApp(new ParkedMap());
+void main() => runApp(const ParkedMap());
 
 class ParkedMap extends StatelessWidget {
+  const ParkedMap({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext) {
-    return Home();
+  Widget build(BuildContext context) {
+    return const Home();
   }
 }

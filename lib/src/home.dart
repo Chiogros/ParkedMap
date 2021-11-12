@@ -3,6 +3,8 @@ import 'drawer.dart';
 import 'map.dart';
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -18,8 +20,8 @@ class _HomeState extends State<Home> {
           title: const Text("ParkedMap"),
           backgroundColor: const Color(0xFF00AA33),
         ),
-        drawer: new CustomDrawer(),
-        body: new CustomMap(),
+        drawer: const CustomDrawer(),
+        body: const CustomMap(),
       ),
     );
   }

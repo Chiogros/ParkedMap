@@ -5,6 +5,8 @@ import 'package:latlng/latlng.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CustomMap extends StatefulWidget {
+  const CustomMap({Key? key}) : super(key: key);
+
   @override
   _CustomMapState createState() => _CustomMapState();
 }
