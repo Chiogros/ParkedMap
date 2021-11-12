@@ -38,7 +38,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               ]
             ),
           ),
-          const ListTile(leading: Icon(Icons.add_location_alt_rounded), title: Text("")),
+          const ListTile(leading: Icon(Icons.add_location_alt_rounded), title: Text("Follow someone")),
         ]
       )
     );

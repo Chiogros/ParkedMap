@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'drawer.dart';
 import 'map.dart';
 
 class Home extends StatefulWidget {
@@ -20,7 +19,6 @@ class _HomeState extends State<Home> {
           title: const Text("ParkedMap"),
           backgroundColor: const Color(0xFF00AA33),
         ),
-        drawer: const CustomDrawer(),
         body: const CustomMap(),
       ),
     );
