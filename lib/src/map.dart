@@ -1,12 +1,17 @@
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
-import 'package:map/map.dart';
+//import 'package:map/map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:latlng/latlng.dart';
+//import 'package:latlng/latlng.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
+import 'popup.dart';
 
 class CustomMap extends StatefulWidget {
   const CustomMap({Key? key}) : super(key: key);
@@ -16,32 +21,31 @@ class CustomMap extends StatefulWidget {
 }
 
 class _CustomMapState extends State<CustomMap> {
-  final controller = MapController(
-    location: LatLng(48.8582615, 2.2927286),
-  );
+  LatLng position = LatLng(48.8582615, 2.2927286);
+  final PopupController _popupLayerController = PopupController();
+  final List<LatLng> _markerPositions = [
+    LatLng(48.873848, 2.2950682),  // Arc de Triomphe
+    LatLng(48.856529, 2.3127059),  // Hôtel des Invalides
+    LatLng(48.8719697, 2.3316014),  // Palais Garnier
+    LatLng(48.8606111, 2.337644),  // Musée du Louvre
+    LatLng(48.8529682, 2.3499021),  // Cathédrale Notre-Dame de Paris
+    LatLng(48.8462218, 2.3464138),  // Panthéon
+    LatLng(48.8583701, 2.2944813),  // Tour Eiffel
+    LatLng(48.8656331, 2.3212357), // Place de la Concorde
+  ];
 
-  void _onDoubleTap() {
+  /*void _onDoubleTap() {
     controller.zoom += 0.5;
     setState(() {});
-  }
+  }*/
 
   void _onButton() async {
-    /*final LocationPermission checkedPermission = await GeolocatorPlatform.instance.checkPermission();
-
-    final bool hasAuthorization = checkedPermission == LocationPermission.always
-                               || checkedPermission == LocationPermission.whileInUse;
-
-    if (!hasAuthorization) {
-      await GeolocatorPlatform.instance.requestPermission();
-      return ;
-    }*/
     try {
+      // Center view on current position
       Position currentPos = await Geolocator.getCurrentPosition();
-      controller.center=(
-        LatLng(
+      position = LatLng(
           currentPos.latitude,
           currentPos.longitude
-        )
       );
     } on TimeoutException {
       // nothing
@@ -70,86 +74,48 @@ class _CustomMapState extends State<CustomMap> {
     _scaleStart = 1.0;
   }
 
-  void _onScaleUpdate(ScaleUpdateDetails details) {
-    final scaleDiff = details.scale - _scaleStart;
-    _scaleStart = details.scale;
-
-    if (scaleDiff > 0) {
-      controller.zoom += 0.02;
-      setState(() {});
-    } else if (scaleDiff < 0) {
-      controller.zoom -= 0.02;
-      setState(() {});
-    } else {
-      final now = details.focalPoint;
-      final diff = now - _dragStart!;
-      _dragStart = now;
-      controller.drag(diff.dx, diff.dy);
-      setState(() {});
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MapLayoutBuilder(
-        controller: controller,
-        builder: (context, transformer) {
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onDoubleTap: _onDoubleTap,
-            onScaleStart: _onScaleStart,
-            onScaleUpdate: _onScaleUpdate,
-            onTapUp: (details) {
-              final location = transformer.fromXYCoordsToLatLng(details.localPosition);
-
-              final clicked = transformer.fromLatLngToXYCoords(location);
-
-              print('${location.longitude}, ${location.latitude}');
-              print('${clicked.dx}, ${clicked.dy}');
-              print('${details.localPosition.dx}, ${details.localPosition.dy}');
-            },
-            child: Listener(
-              behavior: HitTestBehavior.opaque,
-              onPointerSignal: (event) {
-                if (event is PointerScrollEvent) {
-                  final delta = event.scrollDelta;
-
-                  controller.zoom -= delta.dy / 1000.0;
-                  setState(() {});
-                }
-              },
-              child: Stack(
-                children: [
-                  Map(
-                    controller: controller,
-                    builder: (context, x, y, z) {
-                      //Legal notice: This url is only used for demo and educational purposes. You need a license key for production use.
-
-                      //Google Maps
-                      final url = 'https://www.google.com/maps/vt/pb=!1m4!1m3!1i$z!2i$x!3i$y!2m3!1e0!2sm!3i420120488!3m7!2sen!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!23i4111425';
-
-                      final darkUrl = 'https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i$z!2i$x!3i$y!4i256!2m3!1e0!2sm!3i556279080!3m17!2sen-US!3sUS!5e18!12m4!1e68!2m2!1sset!2sRoadmap!12m3!1e37!2m1!1ssmartmaps!12m4!1e26!2m2!1sstyles!2zcC52Om9uLHMuZTpsfHAudjpvZmZ8cC5zOi0xMDAscy5lOmwudC5mfHAuczozNnxwLmM6I2ZmMDAwMDAwfHAubDo0MHxwLnY6b2ZmLHMuZTpsLnQuc3xwLnY6b2ZmfHAuYzojZmYwMDAwMDB8cC5sOjE2LHMuZTpsLml8cC52Om9mZixzLnQ6MXxzLmU6Zy5mfHAuYzojZmYwMDAwMDB8cC5sOjIwLHMudDoxfHMuZTpnLnN8cC5jOiNmZjAwMDAwMHxwLmw6MTd8cC53OjEuMixzLnQ6NXxzLmU6Z3xwLmM6I2ZmMDAwMDAwfHAubDoyMCxzLnQ6NXxzLmU6Zy5mfHAuYzojZmY0ZDYwNTkscy50OjV8cy5lOmcuc3xwLmM6I2ZmNGQ2MDU5LHMudDo4MnxzLmU6Zy5mfHAuYzojZmY0ZDYwNTkscy50OjJ8cy5lOmd8cC5sOjIxLHMudDoyfHMuZTpnLmZ8cC5jOiNmZjRkNjA1OSxzLnQ6MnxzLmU6Zy5zfHAuYzojZmY0ZDYwNTkscy50OjN8cy5lOmd8cC52Om9ufHAuYzojZmY3ZjhkODkscy50OjN8cy5lOmcuZnxwLmM6I2ZmN2Y4ZDg5LHMudDo0OXxzLmU6Zy5mfHAuYzojZmY3ZjhkODl8cC5sOjE3LHMudDo0OXxzLmU6Zy5zfHAuYzojZmY3ZjhkODl8cC5sOjI5fHAudzowLjIscy50OjUwfHMuZTpnfHAuYzojZmYwMDAwMDB8cC5sOjE4LHMudDo1MHxzLmU6Zy5mfHAuYzojZmY3ZjhkODkscy50OjUwfHMuZTpnLnN8cC5jOiNmZjdmOGQ4OSxzLnQ6NTF8cy5lOmd8cC5jOiNmZjAwMDAwMHxwLmw6MTYscy50OjUxfHMuZTpnLmZ8cC5jOiNmZjdmOGQ4OSxzLnQ6NTF8cy5lOmcuc3xwLmM6I2ZmN2Y4ZDg5LHMudDo0fHMuZTpnfHAuYzojZmYwMDAwMDB8cC5sOjE5LHMudDo2fHAuYzojZmYyYjM2Mzh8cC52Om9uLHMudDo2fHMuZTpnfHAuYzojZmYyYjM2Mzh8cC5sOjE3LHMudDo2fHMuZTpnLmZ8cC5jOiNmZjI0MjgyYixzLnQ6NnxzLmU6Zy5zfHAuYzojZmYyNDI4MmIscy50OjZ8cy5lOmx8cC52Om9mZixzLnQ6NnxzLmU6bC50fHAudjpvZmYscy50OjZ8cy5lOmwudC5mfHAudjpvZmYscy50OjZ8cy5lOmwudC5zfHAudjpvZmYscy50OjZ8cy5lOmwuaXxwLnY6b2Zm!4e0&key=AIzaSyAOqYYyBbtXQEtcHG7hwAwyCPQSYidG8yU&token=31440';
-                      //Mapbox Streets
-                      // final url =
-                      //     'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/$z/$x/$y?access_token=YOUR_MAPBOX_ACCESS_TOKEN';
-
-                      return CachedNetworkImage(
-                        imageUrl: url,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                ],
-              ),
+      body: FlutterMap(
+        options: MapOptions(
+          center: position,
+          zoom: 13.0,
+        ),
+        children: [
+          TileLayerWidget(
+            options: TileLayerOptions(
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              subdomains: ['a', 'b', 'c'],
+            )
+          ),
+          PopupMarkerLayerWidget(
+            options: PopupMarkerLayerOptions(
+              popupController: _popupLayerController,
+              markers: _markers,
+              markerRotateAlignment: PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
+              popupBuilder: (BuildContext context, Marker marker) =>
+                  Popup(marker),
             ),
-          );
-        },
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onButton,
         child: Icon(Icons.my_location),
+        backgroundColor: const Color(0xFF00AA33),
       ),
     );
   }
+
+  List<Marker> get _markers => _markerPositions
+      .map(
+        (markerPosition) => Marker(
+      point: markerPosition,
+      width: 40,
+      height: 40,
+      builder: (_) => Icon(Icons.location_on, size: 40, color: const Color(0xFF00AA33)),
+      anchorPos: AnchorPos.align(AnchorAlign.top),
+    ),
+  ).toList();
 }
