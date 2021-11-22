@@ -1,15 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
-//import 'package:map/map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-//import 'package:latlng/latlng.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart';
 
 import 'popup.dart';
 
@@ -21,9 +20,9 @@ class CustomMap extends StatefulWidget {
 }
 
 class _CustomMapState extends State<CustomMap> {
-  LatLng position = LatLng(48.8582615, 2.2927286);
+  LatLng position = LatLng(45.172044, 5.734129);
   final PopupController _popupLayerController = PopupController();
-  final List<LatLng> _markerPositions = [
+  List<LatLng> _markerPositions = [
     LatLng(48.873848, 2.2950682),  // Arc de Triomphe
     LatLng(48.856529, 2.3127059),  // Hôtel des Invalides
     LatLng(48.8719697, 2.3316014),  // Palais Garnier
@@ -34,10 +33,44 @@ class _CustomMapState extends State<CustomMap> {
     LatLng(48.8656331, 2.3212357), // Place de la Concorde
   ];
 
-  /*void _onDoubleTap() {
-    controller.zoom += 0.5;
+  Future<List<dynamic>> downloadPlaces() async {
+    const String url = "https://gist.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
+
+    Response response = await get(Uri.parse(url));
+
+    try {
+      List<dynamic> data = jsonDecode(response.body);
+      return data;
+    } on FormatException {
+      throw const FormatException("Parsing error.");
+    }
+  }
+
+  Future<List<LatLng>> parsePlaces(List<dynamic> _data) async {
+    List<LatLng> _places = <LatLng>[];
+
+    _data.map((e) {
+      _places.add(LatLng(e["lat"], e["lng"]));
+    }).toList();
+
+    return _places;
+  }
+  
+  void updatePlaces() async {
+    List<dynamic> data = await downloadPlaces();
+
+    try {
+      _markerPositions = await parsePlaces(data);
+    } on FormatException {
+      // snackbar
+      data = data;
+    }
+
+    // Refresh display
     setState(() {});
-  }*/
+    
+    return ;
+  }
 
   void _onButton() async {
     try {
@@ -57,21 +90,13 @@ class _CustomMapState extends State<CustomMap> {
           label: "Settings",
           onPressed: _openLocSettings,
         ),
-        content: Text("Location disabled"),
+        content: const Text("Location disabled"),
       );
     }
   }
 
   void _openLocSettings() async {
-    print("Open settings");
     await GeolocatorPlatform.instance.openLocationSettings();
-  }
-
-  Offset? _dragStart;
-  double _scaleStart = 1.0;
-  void _onScaleStart(ScaleStartDetails details) {
-    _dragStart = details.focalPoint;
-    _scaleStart = 1.0;
   }
 
   @override
@@ -101,21 +126,23 @@ class _CustomMapState extends State<CustomMap> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _onButton,
-        child: Icon(Icons.my_location),
+        // onPressed: _onButton,
+        onPressed: updatePlaces,
+        child: const Icon(Icons.my_location),
         backgroundColor: const Color(0xFF00AA33),
       ),
     );
   }
 
   List<Marker> get _markers => _markerPositions
-      .map(
-        (markerPosition) => Marker(
-      point: markerPosition,
-      width: 40,
-      height: 40,
-      builder: (_) => Icon(Icons.location_on, size: 40, color: const Color(0xFF00AA33)),
-      anchorPos: AnchorPos.align(AnchorAlign.top),
-    ),
-  ).toList();
+    .map(
+      (markerPosition) => Marker(
+        point: markerPosition,
+        width: 40,
+        height: 40,
+        builder: (_) => const Icon(Icons.location_on, size: 40, color: Color(0xFF00AA33)),
+        anchorPos: AnchorPos.align(AnchorAlign.top),
+      ),
+    )
+    .toList();
 }
