@@ -1,0 +1,6 @@
+.idea
+*.orig
+*.bak
+build
+pubspec.lock
+.dart_tool
