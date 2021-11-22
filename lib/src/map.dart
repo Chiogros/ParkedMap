@@ -20,7 +20,7 @@ class CustomMap extends StatefulWidget {
 }
 
 class _CustomMapState extends State<CustomMap> {
-  LatLng position = LatLng(48.8582615, 2.2927286);
+  LatLng position = LatLng(45.172044, 5.734129);
   final PopupController _popupLayerController = PopupController();
   List<LatLng> _markerPositions = [
     LatLng(48.873848, 2.2950682),  // Arc de Triomphe
@@ -33,30 +33,40 @@ class _CustomMapState extends State<CustomMap> {
     LatLng(48.8656331, 2.3212357), // Place de la Concorde
   ];
 
-  Future<JsonDecoder> downloadPlaces() async {
-    const String url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/dc7c0354b258741078217f14415325a433d3194c/parking.json";
+  Future<List<dynamic>> downloadPlaces() async {
+    const String url = "https://gist.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
 
     Response response = await get(Uri.parse(url));
-    JsonDecoder data = jsonDecode(response.body);
 
-    return data;
+    try {
+      List<dynamic> data = jsonDecode(response.body);
+      return data;
+    } on FormatException {
+      throw const FormatException("Parsing error.");
+    }
   }
 
-  Future<List<LatLng>> parsePlaces(JsonDecoder _data) async {
+  Future<List<LatLng>> parsePlaces(List<dynamic> _data) async {
     List<LatLng> _places = <LatLng>[];
 
-    (_data as List).map((e) {
+    _data.map((e) {
       _places.add(LatLng(e["lat"], e["lng"]));
-    });
+    }).toList();
 
     return _places;
   }
   
   void updatePlaces() async {
-    _markerPositions = await parsePlaces(
-      await downloadPlaces()
-    );
+    List<dynamic> data = await downloadPlaces();
 
+    try {
+      _markerPositions = await parsePlaces(data);
+    } on FormatException {
+      // snackbar
+      data = data;
+    }
+
+    // Refresh display
     setState(() {});
     
     return ;
@@ -116,7 +126,8 @@ class _CustomMapState extends State<CustomMap> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _onButton,
+        // onPressed: _onButton,
+        onPressed: updatePlaces,
         child: const Icon(Icons.my_location),
         backgroundColor: const Color(0xFF00AA33),
       ),
