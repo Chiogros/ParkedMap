@@ -33,7 +33,7 @@ class _PopupState extends State<Popup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.only(left: 20, right: 10),
+              padding: const EdgeInsets.only(left: 20, right: 10),
               child: Icon(_icons[_currentIcon]),
             ),
             _cardDescription(context),
@@ -47,17 +47,17 @@ class _PopupState extends State<Popup> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
-        constraints: BoxConstraints(minWidth: 100, maxWidth: 200),
+        constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
+            const Text(
               'Popup for a marker!',
               overflow: TextOverflow.fade,
               softWrap: false,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14.0,
               ),
