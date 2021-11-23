@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:geolocator/geolocator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart';
+import 'package:geolocator/geolocator.dart';  // getCurrentPosition()
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';  //
+import 'package:flutter_map/flutter_map.dart';  // FlutterMap
+import 'package:latlong2/latlong.dart'; // LatLng
+import 'package:http/http.dart';  // get(Uri)
 
 import 'popup.dart';
 
@@ -139,8 +137,14 @@ class _CustomMapState extends State<CustomMap> {
               markerRotateAlignment: PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
               popupBuilder: (BuildContext context, Marker marker) =>
                   Popup(marker),
+              markerCenterAnimation: const MarkerCenterAnimation(), // Center view on marker when clicked
+              popupAnimation: const PopupAnimation.fade(
+                duration: Duration(
+                  milliseconds: 200
+                )
+              ) // PopUp fade I/O animation
             ),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
