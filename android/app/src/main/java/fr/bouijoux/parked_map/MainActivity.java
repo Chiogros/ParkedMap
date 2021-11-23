@@ -1,4 +1,4 @@
-package fr.bouijoux.parked_map;
+package fr.bouijoux.parkedmap;
 
 import io.flutter.embedding.android.FlutterActivity;
 

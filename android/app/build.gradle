@@ -34,8 +34,8 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "fr.bouijoux.parked_map"
-        minSdkVersion 18
+        applicationId "fr.bouijoux.parkedmap"
+        minSdkVersion 16
         targetSdkVersion 26
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
