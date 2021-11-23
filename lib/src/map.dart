@@ -33,7 +33,7 @@ class _CustomMapState extends State<CustomMap> {
     LatLng(48.8656331, 2.3212357), // Place de la Concorde
   ];
 
-  Future<String> downloadPlaces() async {
+  Future<String> _downloadPlaces() async {
     const String _url = "https://gi.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
 
     Response _response = await get(Uri.parse(_url));
@@ -45,7 +45,7 @@ class _CustomMapState extends State<CustomMap> {
     return _response.body;
   }
 
-  List<dynamic> parseJson(String jsonString) {
+  List<dynamic> _parseJson(String jsonString) {
     try {
       return jsonDecode(jsonString);
     } on FormatException {
@@ -53,7 +53,7 @@ class _CustomMapState extends State<CustomMap> {
     }
   }
 
-  Future<List<LatLng>> parsePlaces(List<dynamic> _data) async {
+  Future<List<LatLng>> _parsePlaces(List<dynamic> _data) async {
     List<LatLng> _places = <LatLng>[];
 
     _data.map((e) {
@@ -63,12 +63,12 @@ class _CustomMapState extends State<CustomMap> {
     return _places;
   }
   
-  void updatePlaces() async {
+  void _updatePlaces() async {
     try {
-      String _rawData = await downloadPlaces();
-      List<dynamic> _data = parseJson(_rawData);
+      String _rawData = await _downloadPlaces();
+      List<dynamic> _data = _parseJson(_rawData);
 
-      _markerPositions = await parsePlaces(_data);
+      _markerPositions = await _parsePlaces(_data);
     } on FormatException catch (e) {
       // SnackBar
     } on Exception catch (e) {
@@ -114,6 +114,10 @@ class _CustomMapState extends State<CustomMap> {
         title: const Text("ParkedMap"),
         backgroundColor: const Color(0xFF00AA33),
         actions: [
+          IconButton(
+            onPressed: _updatePlaces,
+            icon: const Icon(Icons.refresh)
+          )
         ],
       ),
       body: FlutterMap(
@@ -140,8 +144,7 @@ class _CustomMapState extends State<CustomMap> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        // onPressed: _onButton,
-        onPressed: updatePlaces,
+        onPressed: _onButton,
         child: const Icon(Icons.my_location),
         backgroundColor: const Color(0xFF00AA33),
       ),
