@@ -11,15 +11,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: "ParkedMap",
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text("ParkedMap"),
-          backgroundColor: const Color(0xFF00AA33),
-        ),
-        body: const CustomMap(),
+        body: CustomMap(),
       ),
     );
   }

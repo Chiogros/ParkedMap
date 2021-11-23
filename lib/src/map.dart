@@ -33,14 +33,21 @@ class _CustomMapState extends State<CustomMap> {
     LatLng(48.8656331, 2.3212357), // Place de la Concorde
   ];
 
-  Future<List<dynamic>> downloadPlaces() async {
-    const String url = "https://gist.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
+  Future<String> downloadPlaces() async {
+    const String _url = "https://gi.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
 
-    Response response = await get(Uri.parse(url));
+    Response _response = await get(Uri.parse(_url));
 
+    if (_response.statusCode != 200) {
+      throw Exception("Cannot download places list.");
+    }
+
+    return _response.body;
+  }
+
+  List<dynamic> parseJson(String jsonString) {
     try {
-      List<dynamic> data = jsonDecode(response.body);
-      return data;
+      return jsonDecode(jsonString);
     } on FormatException {
       throw const FormatException("Parsing error.");
     }
@@ -57,19 +64,19 @@ class _CustomMapState extends State<CustomMap> {
   }
   
   void updatePlaces() async {
-    List<dynamic> data = await downloadPlaces();
-
     try {
-      _markerPositions = await parsePlaces(data);
-    } on FormatException {
-      // snackbar
-      data = data;
+      String _rawData = await downloadPlaces();
+      List<dynamic> _data = parseJson(_rawData);
+
+      _markerPositions = await parsePlaces(_data);
+    } on FormatException catch (e) {
+      // SnackBar
+    } on Exception catch (e) {
+      //SnackBar
     }
 
     // Refresh display
     setState(() {});
-    
-    return ;
   }
 
   void _onButton() async {
@@ -102,6 +109,13 @@ class _CustomMapState extends State<CustomMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: const Icon(Icons.local_parking),
+        title: const Text("ParkedMap"),
+        backgroundColor: const Color(0xFF00AA33),
+        actions: [
+        ],
+      ),
       body: FlutterMap(
         options: MapOptions(
           center: position,
