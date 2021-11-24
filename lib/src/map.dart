@@ -7,6 +7,8 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';  //
 import 'package:flutter_map/flutter_map.dart';  // FlutterMap
 import 'package:latlong2/latlong.dart'; // LatLng
 import 'package:http/http.dart';  // get(Uri)
+import 'package:parkedmap/src/place.dart';
+import 'package:parkedmap/src/place_marker.dart';
 
 import 'popup.dart';
 
@@ -18,21 +20,12 @@ class CustomMap extends StatefulWidget {
 }
 
 class _CustomMapState extends State<CustomMap> {
-  LatLng position = LatLng(45.172044, 5.734129);
+  LatLng _position = LatLng(45.172044, 5.734129);
   final PopupController _popupLayerController = PopupController();
-  List<LatLng> _markerPositions = [
-    LatLng(48.873848, 2.2950682),  // Arc de Triomphe
-    LatLng(48.856529, 2.3127059),  // Hôtel des Invalides
-    LatLng(48.8719697, 2.3316014),  // Palais Garnier
-    LatLng(48.8606111, 2.337644),  // Musée du Louvre
-    LatLng(48.8529682, 2.3499021),  // Cathédrale Notre-Dame de Paris
-    LatLng(48.8462218, 2.3464138),  // Panthéon
-    LatLng(48.8583701, 2.2944813),  // Tour Eiffel
-    LatLng(48.8656331, 2.3212357), // Place de la Concorde
-  ];
+  List<Place> _places = <Place>[];
 
   Future<String> _downloadPlaces() async {
-    const String _url = "https://gist.githubusercontent.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/bf9b3c4260ba8944cf6b302ff7fdba8d13722122/parking.json";
+    const String _url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/d389ade685958301e84ac18ab8a916cf779d2da9/parking.json";
 
     Response _response = await get(Uri.parse(_url));
 
@@ -51,12 +44,68 @@ class _CustomMapState extends State<CustomMap> {
     }
   }
 
-  Future<List<LatLng>> _parsePlaces(List<dynamic> _data) async {
-    List<LatLng> _places = <LatLng>[];
+  Future<List<Place>> _parsePlaces(List<dynamic> _data) async {
+    List<Place> _places = <Place>[];
 
+    // Transform all json places in Place objects
     _data.map((e) {
-      _places.add(LatLng(e["lat"], e["lng"]));
-    }).toList();
+      LatLng _location;
+      PlaceType _type;
+      PlaceDifficulty _difficulty;
+
+      if (!(e["lat"] is double
+         && e["lng"] is double
+         && e["type"] is String
+         && e["difficulty"] is String)) {
+        throw const FormatException("A parameter is wrong.");
+      }
+
+      // Check type and difficulty are non empty
+      if (e["type"].toString().isEmpty
+       || e["difficulty"].toString().isEmpty) {
+        throw const FormatException("A type or a difficulty is empty.");
+      }
+
+      // Set location
+      _location = LatLng(e["lat"], e["lng"]);
+
+      // Set type
+      switch(e["type"]) {
+        case "deg0":
+          _type = PlaceType.deg0;
+          break;
+        case "deg45":
+          _type = PlaceType.deg45;
+          break;
+        case "deg90":
+          _type = PlaceType.deg90;
+          break;
+        default:
+          throw FormatException("'" + e["type"] + "' is not a valid type.");
+      }
+
+      // Set difficulty
+      switch(e["difficulty"]) {
+        case "easy":
+          _difficulty = PlaceDifficulty.easy;
+          break;
+        case "medium":
+          _difficulty = PlaceDifficulty.medium;
+          break;
+        case "hard":
+          _difficulty = PlaceDifficulty.hard;
+          break;
+        default:
+          throw FormatException("'" + e["difficulty"] + "' is not a valid difficulty.");
+      }
+
+      // Add generated Place object to list
+      _places.add(Place(
+        _location,
+        _type,
+        _difficulty
+      )); // _places.add
+    }).toList();  // map
 
     return _places;
   }
@@ -66,22 +115,32 @@ class _CustomMapState extends State<CustomMap> {
       String _rawData = await _downloadPlaces();
       List<dynamic> _data = _parseJson(_rawData);
 
-      _markerPositions = await _parsePlaces(_data);
-    } on FormatException catch (e) {
+      _places = await _parsePlaces(_data);
+    } on FormatException catch (fex) {
       // SnackBar
-    } on Exception catch (e) {
+      SnackBar(
+        content: Text(fex.message)
+      );
+    } on Exception catch (ex) {
       //SnackBar
+      SnackBar(
+          content: Text(ex.toString())
+      );
     }
 
     // Refresh display
     setState(() {});
   }
 
+  List<PlaceMarker> _getMarkersFromPlaces(List<Place> _places2transform) {
+    return _places2transform.map((p) => PlaceMarker(p)).toList();
+  }
+  
   void _onButton() async {
     try {
       // Center view on current position
       Position currentPos = await Geolocator.getCurrentPosition();
-      position = LatLng(
+      _position = LatLng(
           currentPos.latitude,
           currentPos.longitude
       );
@@ -120,7 +179,7 @@ class _CustomMapState extends State<CustomMap> {
       ),
       body: FlutterMap(
         options: MapOptions(
-          center: position,
+          center: _position,
           zoom: 13.0,
         ),
         children: [
@@ -133,7 +192,7 @@ class _CustomMapState extends State<CustomMap> {
           PopupMarkerLayerWidget(
             options: PopupMarkerLayerOptions(
               popupController: _popupLayerController,
-              markers: _markers,
+              markers: _getMarkersFromPlaces(_places),
               markerRotateAlignment: PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
               popupBuilder: (BuildContext context, Marker marker) =>
                   Popup(marker),
@@ -154,16 +213,4 @@ class _CustomMapState extends State<CustomMap> {
       ),
     );
   }
-
-  List<Marker> get _markers => _markerPositions
-    .map(
-      (markerPosition) => Marker(
-        point: markerPosition,
-        width: 40,
-        height: 40,
-        builder: (_) => const Icon(Icons.location_on, size: 40, color: Color(0xFF00AA33)),
-        anchorPos: AnchorPos.align(AnchorAlign.top),
-      ),
-    )
-    .toList();
 }

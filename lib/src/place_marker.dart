@@ -3,8 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:parkedmap/src/place.dart';
 
 class PlaceMarker extends Marker {
-  PlaceMarker(Place place)
-  : super(
+  PlaceMarker(Place place) : super(
     point: place.getLocation(),
     builder: (_) {
       Icon icon2display;
