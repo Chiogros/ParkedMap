@@ -194,7 +194,7 @@ class _CustomMapState extends State<CustomMap> {
               popupController: _popupLayerController,
               markers: _getMarkersFromPlaces(_places),
               markerRotateAlignment: PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
-              popupBuilder: _popUpWdget,
+              popupBuilder: _popUpWidget,
               markerCenterAnimation: const MarkerCenterAnimation(), // Center view on marker when clicked
               popupAnimation: const PopupAnimation.fade(
                 duration: Duration(
@@ -213,5 +213,5 @@ class _CustomMapState extends State<CustomMap> {
     );
   }
 
-  Widget _popUpWdget(BuildContext context, dynamic marker) => Popup(marker);  // for popup builder
+  Widget _popUpWidget(BuildContext context, dynamic marker) => Popup(marker);  // for popup builder
 }
