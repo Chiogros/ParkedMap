@@ -29,12 +29,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   geolocator: any
   flutter_map_marker_popup: any
   flutter_map: any
   latlong2: any
   http: any
   url_launcher: any
+  intl: any
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -94,3 +97,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  generate: true
