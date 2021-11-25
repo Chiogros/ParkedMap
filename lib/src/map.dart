@@ -213,5 +213,5 @@ class _CustomMapState extends State<CustomMap> {
     );
   }
 
-  Widget _popUpWidget(BuildContext context, dynamic marker) => Popup(marker);  // for popup builder
+  Widget _popUpWidget(BuildContext context, dynamic marker) => Popup(placeMarker: marker);  // for popup builder
 }

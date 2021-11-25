@@ -6,24 +6,25 @@ import 'package:parkedmap/src/place_marker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Popup extends StatefulWidget {
-  final PlaceMarker _placeMarker;
+  final PlaceMarker placeMarker;
 
-  const Popup(this._placeMarker, {Key? key}) : super(key: key);
+  const Popup({
+    Key? key,
+    required this.placeMarker
+  }) : super(key: key);
 
   @override
-  _PopupState createState() => _PopupState(_placeMarker, _placeMarker.getPlace());
+  _PopupState createState() => _PopupState();
 }
 
 class _PopupState extends State<Popup> {
-  final PlaceMarker _marker;
-  final Place _place;
+  late final Place _place = widget.placeMarker.getPlace();
 
-  HashMap strings = HashMap();
+  // Contains place attributes's strings to display
+  HashMap<String, String> strings = HashMap();
 
-  _PopupState(this._marker, this._place) {
-    setAttributes();
-  }
-  
+  _PopupState();
+
   void setAttributes() {
     // Set text for difficulty
     switch(_place.getDifficulty()) {
@@ -52,6 +53,7 @@ class _PopupState extends State<Popup> {
           children: <Widget>[
             IconButton(
                 onPressed: () async {
+                  setAttributes();
                   await launch("https://www.google.com/maps/search/?api=1&query=${_place.getLocation().latitude},${_place.getLocation().longitude}");
                 },
                 icon: const Icon(Icons.alt_route)
