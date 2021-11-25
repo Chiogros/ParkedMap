@@ -25,7 +25,7 @@ class _CustomMapState extends State<CustomMap> {
   List<Place> _places = <Place>[];
 
   Future<String> _downloadPlaces() async {
-    const String _url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/d389ade685958301e84ac18ab8a916cf779d2da9/parking.json";
+    const String _url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw";
 
     Response _response = await get(Uri.parse(_url));
 
