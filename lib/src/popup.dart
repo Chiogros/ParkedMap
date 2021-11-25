@@ -62,9 +62,14 @@ class _PopupState extends State<Popup> {
                 icon: const Icon(Icons.alt_route)
             ),
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(getDifficultyString(context)),
+                Text(
+                  getDifficultyString(context),
+                  style: const TextStyle(fontSize: 9),
+                ),
                 Text(getTypeString(context)),
               ],
             )
