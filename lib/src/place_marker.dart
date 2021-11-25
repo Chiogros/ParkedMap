@@ -3,11 +3,13 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:parkedmap/src/place.dart';
 
 class PlaceMarker extends Marker {
-  PlaceMarker(Place place) : super(
-    point: place.getLocation(),
+  final Place _place;
+
+  PlaceMarker(this._place) : super(
+    point: _place.getLocation(),
     builder: (_) {
       Icon icon2display;
-      switch (place.getType()) {
+      switch (_place.getType()) {
         case PlaceType.deg0:
           icon2display = const Icon(
             Icons.location_on,
@@ -33,4 +35,8 @@ class PlaceMarker extends Marker {
       return icon2display;
     }
   );
+
+  Place getPlace() {
+    return _place;
+  }
 }
