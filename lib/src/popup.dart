@@ -1,9 +1,11 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:parkedmap/src/place.dart';
 import 'package:parkedmap/src/place_marker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Popup extends StatefulWidget {
   final PlaceMarker placeMarker;
@@ -25,21 +27,23 @@ class _PopupState extends State<Popup> {
 
   _PopupState();
 
-  void setAttributes() {
-    // Set text for difficulty
-    switch(_place.getDifficulty()) {
-      case PlaceDifficulty.easy: strings["difficulty"] = "Easy"; break;
-      case PlaceDifficulty.medium: strings["difficulty"] = "Medium"; break;
-      case PlaceDifficulty.hard: strings["difficulty"] = "Hard"; break;
+  String getDifficultyString(BuildContext context) => Intl.select(
+    _place.getDifficulty(),
+    {
+      PlaceDifficulty.easy: AppLocalizations.of(context)!.easy,
+      PlaceDifficulty.medium: AppLocalizations.of(context)!.medium,
+      PlaceDifficulty.hard: AppLocalizations.of(context)!.hard,
     }
+  );
 
-    // Set text for type
-    switch(_place.getType()) {
-      case PlaceType.deg0: strings["type"] = "0 degree"; break;
-      case PlaceType.deg45: strings["type"] = "45 degrees"; break;
-      case PlaceType.deg90: strings["type"] = "90 degrees"; break;
-    }
-  }
+  String getTypeString(BuildContext context) => Intl.select(
+      _place.getType(),
+      {
+        PlaceType.deg0: AppLocalizations.of(context)!.deg0,
+        PlaceType.deg45: AppLocalizations.of(context)!.deg45,
+        PlaceType.deg90: AppLocalizations.of(context)!.deg90,
+      }
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,6 @@ class _PopupState extends State<Popup> {
           children: <Widget>[
             IconButton(
                 onPressed: () async {
-                  setAttributes();
                   await launch("https://www.google.com/maps/search/?api=1&query=${_place.getLocation().latitude},${_place.getLocation().longitude}");
                 },
                 icon: const Icon(Icons.alt_route)
@@ -61,8 +64,8 @@ class _PopupState extends State<Popup> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(strings["difficulty"]),
-                Text(strings["type"]),
+                Text(getDifficultyString(context)),
+                Text(getTypeString(context)),
               ],
             )
           ],
