@@ -2,7 +2,7 @@
     package="fr.bouijoux.parkedmap">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
-        android:label="parkedmap"
+        android:label="ParkedMap"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
