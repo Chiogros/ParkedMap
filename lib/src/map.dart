@@ -21,7 +21,9 @@ class CustomMap extends StatefulWidget {
 
 class _CustomMapState extends State<CustomMap> {
   LatLng _position = LatLng(45.172044, 5.734129);
+  final double _zoom = 13.0;
   final PopupController _popupLayerController = PopupController();
+  final MapController _mapController = MapController();
   List<Place> _places = <Place>[];
 
   Future<String> _downloadPlaces() async {
@@ -144,6 +146,7 @@ class _CustomMapState extends State<CustomMap> {
           currentPos.latitude,
           currentPos.longitude
       );
+      _mapController.move(_position, _zoom);
     } on TimeoutException {
       // nothing
     } on PermissionDeniedException {
@@ -178,9 +181,10 @@ class _CustomMapState extends State<CustomMap> {
         ],
       ),
       body: FlutterMap(
+        mapController: _mapController,
         options: MapOptions(
           center: _position,
-          zoom: 13.0,
+          zoom: _zoom,
         ),
         children: [
           TileLayerWidget(
