@@ -32,7 +32,7 @@ class _CustomMapState extends State<CustomMap> {
     Response _response = await get(Uri.parse(_url));
 
     if (_response.statusCode != 200) {
-      throw Exception("Cannot download places list.");
+      throw ClientException("Cannot download places list.");
     }
 
     return _response.body;
@@ -119,12 +119,14 @@ class _CustomMapState extends State<CustomMap> {
 
       _places = await _parsePlaces(_data);
     } on FormatException catch (fex) {
+      // Display SnackBar error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(fex.message)
         )
       );
     } on Exception catch (ex) {
+      // Display SnackBar error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(ex.toString())
