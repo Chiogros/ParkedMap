@@ -27,7 +27,7 @@ class _CustomMapState extends State<CustomMap> {
   List<Place> _places = <Place>[];
 
   Future<String> _downloadPlaces() async {
-    const String _url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/";
+    const String _url = "https://gist.github.com/Chiogros/c9b97d6d1263a2baad29b3203eda7afb/raw/parking.json";
 
     Response _response = await get(Uri.parse(_url));
 
@@ -119,14 +119,16 @@ class _CustomMapState extends State<CustomMap> {
 
       _places = await _parsePlaces(_data);
     } on FormatException catch (fex) {
-      // SnackBar
-      SnackBar(
-        content: Text(fex.message)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(fex.message)
+        )
       );
     } on Exception catch (ex) {
-      //SnackBar
-      SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
           content: Text(ex.toString())
+        )
       );
     }
 
@@ -152,12 +154,14 @@ class _CustomMapState extends State<CustomMap> {
     } on PermissionDeniedException {
       await GeolocatorPlatform.instance.requestPermission();
     } on LocationServiceDisabledException {
-      SnackBar(
-        action: SnackBarAction(
-          label: "Settings",
-          onPressed: _openLocSettings,
-        ),
-        content: const Text("Location disabled"),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          action: SnackBarAction(
+            label: "Settings",
+            onPressed: _openLocSettings,
+          ),
+          content: const Text("Location disabled."),
+        )
       );
     }
   }
